@@ -33,7 +33,7 @@ def train(*, env_id, num_env, hps, num_timesteps, seed):
     #                        'VentureNoFrameskip-v4': 200,
     #                        'PitfallNoFrameskip-v4': 100,
     #                        }[env_id]
-    venv.score_multiple = 1
+    # venv.score_multiple = 1
     venv.record_obs = True if env_id == 'SolarisNoFrameskip-v4' else False
     ob_space = venv.observation_space
     ac_space = venv.action_space
