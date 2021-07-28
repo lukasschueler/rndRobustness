@@ -11,6 +11,10 @@ from baselines import logger
 from monitor import Monitor
 from atari_wrappers import make_atari, wrap_deepmind
 from vec_env import SubprocVecEnv
+import gym_minigrid
+
+from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
+
 
 
 def make_atari_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, max_episode_steps=4500):
@@ -27,6 +31,55 @@ def make_atari_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, ma
         return _thunk
     # set_global_seeds(seed)
     return SubprocVecEnv([make_env(i + start_index) for i in range(num_env)])
+
+def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, max_episode_steps=4500):
+    """
+    Create a wrapped, monitored SubprocVecEnv for the MiniGrid-Environment
+    """
+    def make_env(rank): # pylint: disable=C0111
+        def _thunk():
+            env = gym.make(env_id)
+            env._max_episode_steps = max_episode_steps*4
+            env.seed(seed + rank)
+            env = Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)), allow_early_resets=True)
+            return ImgObsWrapper(RGBImgPartialObsWrapper(env))
+        return _thunk
+    # set_global_seeds(seed)
+    return SubprocVecEnv([make_env(i + start_index) for i in range(num_env)])
+
+
+
+
+def make_atari(env_id, max_episode_steps=4500):
+    env = gym.make(env_id)
+    env._max_episode_steps = max_episode_steps*4
+    assert 'NoFrameskip' in env.spec.id
+    env = StickyActionEnv(env)
+    env = MaxAndSkipEnv(env, skip=4)
+    if "Montezuma" in env_id or "Pitfall" in env_id:
+        env = MontezumaInfoWrapper(env, room_address=3 if "Montezuma" in env_id else 1)
+    else:
+        env = DummyMontezumaInfoWrapper(env)
+    env = AddRandomStateToInfo(env)
+    return env
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def arg_parser():
     """

@@ -6,20 +6,25 @@ from baselines import logger
 from mpi4py import MPI
 import mpi_util
 import tf_util
-from cmd_util import make_atari_env, arg_parser
+from cmd_util import make_custom_env, arg_parser
 from policies.cnn_gru_policy_dynamics import CnnGruPolicy
 from policies.cnn_policy_param_matched import CnnPolicy
 from ppo_agent import PpoAgent
 from utils import set_global_seeds
 from vec_env import VecFrameStack
+import gym
+import gym_minigrid
+from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
 
 
 def train(*, env_id, num_env, hps, num_timesteps, seed):
-    venv = VecFrameStack(
-        make_atari_env(env_id, num_env, seed, wrapper_kwargs=dict(),
+    # venv = VecFrameStack()
+    venv = make_custom_env(env_id, num_env, seed, wrapper_kwargs=dict(),
                        start_index=num_env * MPI.COMM_WORLD.Get_rank(),
-                       max_episode_steps=hps.pop('max_episode_steps')),
-        hps.pop('frame_stack'))
+                       max_episode_steps=hps.pop('max_episode_steps')
+                        ),
+    hps.pop('frame_stack'
+            )
     # venv.score_multiple = {'Mario': 500,
     #                        'MontezumaRevengeNoFrameskip-v4': 100,
     #                        'GravitarNoFrameskip-v4': 250,
@@ -83,7 +88,7 @@ def train(*, env_id, num_env, hps, num_timesteps, seed):
 
 
 def add_env_params(parser):
-    parser.add_argument('--env', help='environment ID', default='MontezumaRevengeNoFrameskip-v4')
+    parser.add_argument('--env', help='environment ID', default='MiniGrid-DoorKey-5x5-v0')
     parser.add_argument('--seed', help='RNG seed', type=int, default=0)
     parser.add_argument('--max_episode_steps', type=int, default=4500)
 
