@@ -18,13 +18,11 @@ from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartial
 
 
 def train(*, env_id, num_env, hps, num_timesteps, seed):
-    # venv = VecFrameStack()
-    venv = make_custom_env(env_id, num_env, seed, wrapper_kwargs=dict(),
+    venv = VecFrameStack(
+        make_custom_env(env_id, num_env, seed, wrapper_kwargs=dict(),
                        start_index=num_env * MPI.COMM_WORLD.Get_rank(),
-                       max_episode_steps=hps.pop('max_episode_steps')
-                        ),
-    hps.pop('frame_stack'
-            )
+                       max_episode_steps=hps.pop('max_episode_steps')),
+        hps.pop('frame_stack'))
     # venv.score_multiple = {'Mario': 500,
     #                        'MontezumaRevengeNoFrameskip-v4': 100,
     #                        'GravitarNoFrameskip-v4': 250,
@@ -34,6 +32,8 @@ def train(*, env_id, num_env, hps, num_timesteps, seed):
     #                        'PitfallNoFrameskip-v4': 100,
     #                        }[env_id]
     # venv.score_multiple = 1
+    
+    
     venv.record_obs = True if env_id == 'SolarisNoFrameskip-v4' else False
     ob_space = venv.observation_space
     ac_space = venv.action_space
