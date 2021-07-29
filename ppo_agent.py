@@ -446,7 +446,7 @@ class PpoAgent(object):
             sli = slice(l * self.I.lump_stride, (l + 1) * self.I.lump_stride)
             memsli = slice(None) if self.I.mem_state is NO_STATES else sli
             dict_obs = self.stochpol.ensure_observation_is_dict(obs)
-            with logger.ProfileKV("policy_inference"):
+            with logger.profile_kv("policy_inference"):
                 #Calls the policy and value function on current observation.
                 acs, vpreds_int, vpreds_ext, nlps, self.I.mem_state[memsli], ent = self.stochpol.call(dict_obs, news, self.I.mem_state[memsli],
                                                                                                                update_obs_stats=self.update_ob_stats_every_step)
@@ -476,7 +476,7 @@ class PpoAgent(object):
                 for k in self.stochpol.ph_ob_keys:
                     self.I.buf_ob_last[k][sli] = dict_nextobs[k]
                 self.I.buf_new_last[sli] = nextnews
-                with logger.ProfileKV("policy_inference"):
+                with logger.profile_kv("policy_inference"):
                     _, self.I.buf_vpred_int_last[sli], self.I.buf_vpred_ext_last[sli], _, _, _ = self.stochpol.call(dict_nextobs, nextnews, self.I.mem_state[memsli], update_obs_stats=False)
                 self.I.buf_rews_ext[sli, t] = rews
 
