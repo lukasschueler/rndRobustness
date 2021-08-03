@@ -8,6 +8,7 @@ import gym
 from gym.wrappers import FlattenDictWrapper, Monitor
 from mpi4py import MPI
 from baselines import logger
+from stable_baselines.common.vec_env import VecVideoRecorder
 # from monitor import Monitor
 from atari_wrappers import make_atari, wrap_deepmind
 from vec_env import SubprocVecEnv
@@ -42,7 +43,8 @@ def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, m
             env._max_episode_steps = max_episode_steps*4
             env.seed(seed + rank)
             # env = Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)), allow_early_resets=True)
-            env = Monitor(env, "./video", force =True)
+            VecVideoRecorder(env,"./video", lambda x: x % 50 )
+            # env = Monitor(env, "./video", force =True)
             return ImgObsWrapper(RGBImgPartialObsWrapper(env))
         return _thunk
     # set_global_seeds(seed)
