@@ -5,11 +5,12 @@ Helpers for scripts like run_atari.py.
 import os
 
 import gym
-from gym.wrappers import FlattenDictWrapper, Monitor
+from gym.wrappers import FlattenDictWrapper
+from gym.wrappers import Monitor as VideoMonitor
 from mpi4py import MPI
 from baselines import logger
 from stable_baselines.common.vec_env import VecVideoRecorder, DummyVecEnv
-# from monitor import Monitor
+from monitor import Monitor
 from atari_wrappers import make_atari, wrap_deepmind
 from vec_env import SubprocVecEnv
 import gym_minigrid
@@ -42,11 +43,10 @@ def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, m
             env = gym.make(env_id)
             env._max_episode_steps = max_episode_steps*4
             env.seed(seed + rank)
-            # env = Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)), allow_early_resets=True)
-x
-            env = Monitor(env, "./video", force =True)
+            env = Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)), allow_early_resets=True)
+
+            env = VideoMonitor(env, "./video", force =True)
            # env = VecVideoRecorder(env,"./video", record_video_trigger = lambda episode_id: episode_id%500)
-            # env = Monitor(env, "./video", force =True)
             return ImgObsWrapper(RGBImgPartialObsWrapper(env))
         return _thunk
     # set_global_seeds(seed)
