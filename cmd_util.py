@@ -14,7 +14,7 @@ from atari_wrappers import make_atari, wrap_deepmind
 from vec_env import SubprocVecEnv
 import gym_minigrid
 
-from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
+from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper, VectorizedWrapper
 
 
 
@@ -43,13 +43,12 @@ def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, m
             env._max_episode_steps = max_episode_steps*4
             env.seed(seed + rank)
             # env = Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)), allow_early_resets=True)
-            VecVideoRecorder(env,"./video",record_video_trigger = lambda episode_id: episode_id%500)
-            # env = Monitor(env, "./video", force =True)
+           
+            env = Monitor(env, "./video", force =True)
             return ImgObsWrapper(RGBImgPartialObsWrapper(env))
         return _thunk
     # set_global_seeds(seed)
-    return SubprocVecEnv([make_env(i + start_index) for i in range(num_env)])
-
+    return DummyVecEnv([make_env(i+start_index) for i in range(num_env)])
 
 
 

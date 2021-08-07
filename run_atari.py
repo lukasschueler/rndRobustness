@@ -15,14 +15,17 @@ from vec_env import VecFrameStack
 import gym
 import gym_minigrid
 from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
-
+from stable_baselines.common.vec_env import VecVideoRecorder
 
 def train(*, env_id, num_env, hps, num_timesteps, seed):
     venv = VecFrameStack(
-        make_custom_env(env_id, num_env, seed, wrapper_kwargs=dict(),
+    		       make_custom_env(env_id, num_env, seed, wrapper_kwargs=dict(),
                        start_index=num_env * MPI.COMM_WORLD.Get_rank(),
                        max_episode_steps=hps.pop('max_episode_steps')),
-        hps.pop('frame_stack'))
+    hps.pop('frame_stack'))
+
+#    venv.num_envs = num_env
+   # VecVideoRecorder(venv,"./video", record_video_trigger = lambda episode_id: episode_id%500)
     # venv.score_multiple = {'Mario': 500,
     #                        'MontezumaRevengeNoFrameskip-v4': 100,
     #                        'GravitarNoFrameskip-v4': 250,
