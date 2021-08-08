@@ -417,7 +417,8 @@ class PpoAgent(object):
         """
         if self.I.step_count == 0: # On the zeroth step with a new venv, we need to call reset on the environment
             print("IT REALLY HAPPENEND")
-            print("THIS IS I:", self.I.venvs[l])
+            print("THIS IS I:", self.I)
+            print("THIS IS I.venvs:", self.I.venvs[l])
             
             # ob = self.I.venvs[l].reset()
             # out = self.I.env_results[l] = (ob, None, np.ones(self.I.lump_stride, bool), {})
