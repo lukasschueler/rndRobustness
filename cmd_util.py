@@ -45,7 +45,7 @@ def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, m
             env.seed(seed + rank)
             env = Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)), allow_early_resets=True)
 
-            env = VideoMonitor(env, "./video", force =True)
+            env = VideoMonitor(env, "./RNDvideo", video_callable = lambda episode_id: episode_id%100000, force =True)
            # env = VecVideoRecorder(env,"./video", record_video_trigger = lambda episode_id: episode_id%500)
             return ImgObsWrapper(RGBImgPartialObsWrapper(env))
         return _thunk
