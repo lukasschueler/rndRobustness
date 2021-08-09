@@ -416,9 +416,9 @@ class PpoAgent(object):
         Using step_wait if necessary
         """
         if self.I.step_count == 0: # On the zeroth step with a new venv, we need to call reset on the environment
-            print("ATTRIBUTS OF ENV", dir(self.I.venvs[l].venv))
-            # ob = self.I.venvs[l].reset()
-            # out = self.I.env_results[l] = (ob, None, np.ones(self.I.lump_stride, bool), {})
+            # print("ATTRIBUTS OF ENV", dir(self.I.venvs[l].venv))
+            ob = self.I.venvs[l].reset()
+            out = self.I.env_results[l] = (ob, None, np.ones(self.I.lump_stride, bool), {})
         else:
             if self.I.env_results[l] is None:
                 out = self.I.env_results[l] = self.I.venvs[l].step_wait()
