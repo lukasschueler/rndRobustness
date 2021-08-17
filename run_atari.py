@@ -113,7 +113,7 @@ def main():
     parser.add_argument('--tag', type=str, default='')
     parser.add_argument('--policy', type=str, default='rnn', choices=['cnn', 'rnn'])
     parser.add_argument('--int_coeff', type=float, default=1.)
-    parser.add_argument('--ext_coeff', type=float, default=0)
+    parser.add_argument('--ext_coeff', type=float, default=1.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
 
 
