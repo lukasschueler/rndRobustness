@@ -150,7 +150,7 @@ def main():
         dynamics_bonus = args.dynamics_bonus
     )
     wandb.init(config = hps, project = "rnd", group ="1234")
-    wandb.conifg.update(args)
+    wandb.config.update(args)
     tf_util.make_session(make_default=True)
     train(env_id=args.env, num_env=args.num_env, seed=seed,
         num_timesteps=args.num_timesteps, hps=hps)
