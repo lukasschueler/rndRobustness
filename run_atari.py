@@ -16,6 +16,7 @@ import gym
 import gym_minigrid
 from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
 from stable_baselines.common.vec_env import VecVideoRecorder
+import wandb
 
 def train(*, env_id, num_env, hps, num_timesteps, seed):
     venv = VecFrameStack(
@@ -148,7 +149,8 @@ def main():
         ext_coeff=args.ext_coeff,
         dynamics_bonus = args.dynamics_bonus
     )
-
+    wandb.init(config = hps, project = "rnd", group ="1234")
+    wandb.conifg.update(args)
     tf_util.make_session(make_default=True)
     train(env_id=args.env, num_env=args.num_env, seed=seed,
         num_timesteps=args.num_timesteps, hps=hps)

@@ -12,6 +12,7 @@ from recorder import Recorder
 from utils import explained_variance
 from console_util import fmt_row
 from mpi_util import MpiAdamOptimizer, RunningMeanStd, sync_from_root
+import wandb
 
 NO_STATES = ['NO_STATES']
 
@@ -278,7 +279,6 @@ class PpoAgent(object):
             delta = rews_int[:, t] + self.gamma * nextvals * nextnotnew - self.I.buf_vpreds_int[:, t]
             self.I.buf_advs_int[:, t] = lastgaelam = delta + self.gamma * self.lam * nextnotnew * lastgaelam
         rets_int = self.I.buf_advs_int + self.I.buf_vpreds_int
-
         #Calculate extrinsic returns and advantages.
         lastgaelam = 0
         for t in range(self.nsteps-1, -1, -1): # nsteps-2 ... 0
@@ -317,7 +317,7 @@ class PpoAgent(object):
             best_ret = self.best_ret,
             reset_counter = self.I.reset_counter
         )
-
+        wandb.log(info)
         info[f'mem_available'] = psutil.virtual_memory().available
 
         to_record = {'acs': self.I.buf_acs,
@@ -332,6 +332,8 @@ class PpoAgent(object):
                      'ret_int': rets_int,
                      'ret_ext': rets_ext,
                      }
+        wandb.log(to_record)
+        
         if self.I.venvs[0].record_obs:
             to_record['obs'] = self.I.buf_obs[None]
         self.recorder.record(bufs=to_record,
@@ -438,6 +440,7 @@ class PpoAgent(object):
                     #Information like rooms visited is added to info on end of episode.
                     epinfos.append(info['episode'])
                     info_with_places = info['episode']
+                    #COMEMNTED OUT BECAUSE THREW ERROR. SHOULD NOT BE NECESSARY FOR M, CHOSEN ENVIRONEMT
                     # try:
                     #     info_with_places['places'] = info['episode']['visited_rooms']
                     # except:

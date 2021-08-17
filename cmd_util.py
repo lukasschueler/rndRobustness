@@ -41,7 +41,7 @@ def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, m
     def make_env(rank): # pylint: disable=C0111
         def _thunk():
             env = gym.make(env_id)
-            env._max_episode_steps = max_episode_steps*4
+            # env._max_episode_steps = max_episode_steps*4
             env.seed(seed + rank)
             env = Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)), allow_early_resets=True)
 
@@ -50,7 +50,7 @@ def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, m
             return ImgObsWrapper(RGBImgPartialObsWrapper(env))
         return _thunk
     # set_global_seeds(seed)
-    return DummyVecEnv([make_env(i+start_index) for i in range(num_env)])
+    return SubprocVecEnv([make_env(i+start_index) for i in range(num_env)])
 
 
 
