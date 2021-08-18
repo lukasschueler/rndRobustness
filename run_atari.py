@@ -112,7 +112,7 @@ def main():
     parser.add_argument('--proportion_of_exp_used_for_predictor_update', type=float, default=1.)
     parser.add_argument('--tag', type=str, default='')
     parser.add_argument('--policy', type=str, default='rnn', choices=['cnn', 'rnn'])
-    parser.add_argument('--int_coeff', type=float, default=1.)
+    parser.add_argument('--int_coeff', type=float, default=0)
     parser.add_argument('--ext_coeff', type=float, default=1.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
 
@@ -149,7 +149,7 @@ def main():
         ext_coeff=args.ext_coeff,
         dynamics_bonus = args.dynamics_bonus
     )
-    wandb.init(config = hps, project = "rnd", group ="Purely Intrinsic")
+    wandb.init(config = hps, project = "rnd", group ="Purely Extrinsic")
     wandb.config.update(args)
     tf_util.make_session(make_default=True)
     train(env_id=args.env, num_env=args.num_env, seed=seed,
