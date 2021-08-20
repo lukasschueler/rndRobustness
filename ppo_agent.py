@@ -406,6 +406,7 @@ class PpoAgent(object):
         self.stochpol.update_normalization( # Necessary for continuous control tasks with odd obs ranges, only implemented in mlp policy,
             ob=self.I.buf_obs               # NOTE: not shared via MPI
             )
+        wandb.log(info)
         return info
 
     def env_step(self, l, acs):
@@ -418,7 +419,6 @@ class PpoAgent(object):
         Using step_wait if necessary
         """
         if self.I.step_count == 0: # On the zeroth step with a new venv, we need to call reset on the environment
-            # print("ATTRIBUTS OF ENV", dir(self.I.venvs[l].venv))
             ob = self.I.venvs[l].reset()
             out = self.I.env_results[l] = (ob, None, np.ones(self.I.lump_stride, bool), {})
         else:
@@ -440,7 +440,7 @@ class PpoAgent(object):
                     #Information like rooms visited is added to info on end of episode.
                     epinfos.append(info['episode'])
                     info_with_places = info['episode']
-                    #COMEMNTED OUT BECAUSE THREW ERROR. SHOULD NOT BE NECESSARY FOR M, CHOSEN ENVIRONEMT
+                    #COMEMNTED OUT BECAUSE THREW ERROR. SHOULD NOT BE NECESSARY FOR MY CHOSEN ENVIRONEMT
                     # try:
                     #     info_with_places['places'] = info['episode']['visited_rooms']
                     # except:
@@ -538,7 +538,13 @@ class PpoAgent(object):
                 self.I.stats['epcount'] += 1
                 self.I.stats['tcount'] += epinfo['l']
                 self.I.stats['rewtotal'] += epinfo['r']
-                # self.I.stats["best_ext_ret"] = self.best_ret
+                #self.I.stats["best_ext_ret"] = self.best_ret
+                
+                wandb.log({
+                    "Number of Episodes": self.I.stats['epcount'],
+                    "Episode Length": epinfo['l'],
+                    "Episode Reward": epinfo['r']
+                })
 
 
         return {'update' : update_info}
