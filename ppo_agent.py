@@ -185,7 +185,7 @@ class PpoAgent(object):
         #Quantities for reporting.
         self._losses = [loss, pg_loss, vf_loss, entropy, clipfrac, approxkl, maxkl, self.stochpol.aux_loss,
                         self.stochpol.feat_var, self.stochpol.max_feat, global_grad_norm]
-        self.loss_names = ['tot', 'pg', 'vf', 'ent', 'clipfrac', 'approxkl', 'maxkl', "auxloss", "featvar",
+        self.loss_names = ['Total Loss', 'Policy Gradient Loss', 'Value Function Loss', 'Entropy', 'clipfrac', 'approxkl', 'maxkl', "auxloss", "featvar",
                            "maxfeat", "gradnorm"]
         self.I = None
         self.disable_policy_update = None
