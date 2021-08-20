@@ -185,7 +185,7 @@ class PpoAgent(object):
         #Quantities for reporting.
         self._losses = [loss, pg_loss, vf_loss, entropy, clipfrac, approxkl, maxkl, self.stochpol.aux_loss,
                         self.stochpol.feat_var, self.stochpol.max_feat, global_grad_norm]
-        self.loss_names = ['Total Loss', 'Policy Gradient Loss', 'Value Function Loss', 'Entropy', 'clipfrac', 'approxkl', 'maxkl', "auxloss", "featvar",
+        self.loss_names = ['Total Loss', 'Policy Gradient Loss', 'Value Function Loss', 'Entropy', 'clipfrac', 'approxkl', 'maxkl', "auxloss", "feat_var",
                            "maxfeat", "gradnorm"]
         self.I = None
         self.disable_policy_update = None
@@ -335,11 +335,10 @@ class PpoAgent(object):
             "StD of extrinsic Value-Prediction": self.I.buf_vpreds_ext.std(),
             "Explained Variance (Intrinsic)": np.clip(explained_variance(self.I.buf_vpreds_int.ravel(), rets_int.ravel()), -1, None),
             "Explained Variance (Extrinsic)": np.clip(explained_variance(self.I.buf_vpreds_ext.ravel(), rets_ext.ravel()), -1, None),
-            "Recent Best Return": self.best_ret,       
+            "Recent Best Reward": self.best_ret,       
         }
-        wandb.log(myInfo)
         
-        info[f'mem_available'] = psutil.virtual_memory().available
+        # info[f'mem_available'] = psutil.virtual_memory().available
 
 
         to_record = {'acs': self.I.buf_acs,
@@ -362,7 +361,7 @@ class PpoAgent(object):
                      'Value-Predicitons (Extrinsic)': self.I.buf_vpreds_ext,
                      'Advantages (Intrinsic)': self.I.buf_advs_int,
                      'Advantages (Extrinsic)': self.I.buf_advs_ext,
-                     'Entropy': self.I.buf_ent,
+                     'Entropy': np.mean(self.I.buf_ent),
                      'Returns (Intrinsic)': rets_int,
                      'Returns (Extrinsic)': rets_ext,
                      }
@@ -432,15 +431,15 @@ class PpoAgent(object):
 
         if self.is_train_leader:
             self.I.stats["n_updates"] += 1
-            info.update([(n, lossdict[n]) for n in self.loss_names])
+            myInfo.update([(n, lossdict[n]) for n in self.loss_names])
             tnow = time.time()
-            info['Timesteps/Sec'] = self.nsteps * self.I.nenvs / (tnow - self.I.t_last_update)
-            info['Time lapsed'] = time.time() - self.t0
+            myInfo['Timesteps/Sec'] = self.nsteps * self.I.nenvs / (tnow - self.I.t_last_update)
+            myInfo['Time lapsed'] = time.time() - self.t0
             self.I.t_last_update = tnow
         self.stochpol.update_normalization( # Necessary for continuous control tasks with odd obs ranges, only implemented in mlp policy,
             ob=self.I.buf_obs               # NOTE: not shared via MPI
             )
-        wandb.log(info)
+        wandb.log(myInfo)
         wandb.log({"Number of Updates": self.I.stats["n_updates"]})
         return info
 
@@ -579,7 +578,7 @@ class PpoAgent(object):
                     "Number of Episodes": self.I.stats['epcount'],
                     "Episode Length": epinfo['l'],
                     "Episode Reward": epinfo['r'],
-                    "Total Timesteps": self.I.stats['tcount']
+                    "Number of Timesteps": self.I.stats['tcount']
                 })
 
 
