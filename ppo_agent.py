@@ -441,7 +441,7 @@ class PpoAgent(object):
             ob=self.I.buf_obs               # NOTE: not shared via MPI
             )
         wandb.log(info)
-        wandb.log(self.I.stats["n_updates"])
+        wandb.log({"Number of Updates": self.I.stats["n_updates"]})
         return info
 
     def env_step(self, l, acs):
