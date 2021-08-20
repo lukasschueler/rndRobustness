@@ -432,7 +432,7 @@ class PpoAgent(object):
 
         if self.is_train_leader:
             self.I.stats["n_updates"] += 1
-            info.update([('opt_'+n, lossdict[n]) for n in self.loss_names])
+            info.update([(n, lossdict[n]) for n in self.loss_names])
             tnow = time.time()
             info['Timesteps/Sec'] = self.nsteps * self.I.nenvs / (tnow - self.I.t_last_update)
             info['Time lapsed'] = time.time() - self.t0
