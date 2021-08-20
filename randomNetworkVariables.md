@@ -46,3 +46,4 @@
 * Number of Episodes: Gatherer to count the number of run episodes
 * Episode Reward: Episode reward(extrinsic) taken from the "info"-variable returned by an environment-step
 * Episode Length: Episode length taken from the "info"-Argument returned by an environment-step
+* opt_maxfeat

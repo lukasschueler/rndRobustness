@@ -295,8 +295,8 @@ class PpoAgent(object):
 
         #Collects info for reporting.
         info = dict(
-            advmean = self.I.buf_advs.mean(),
-            advstd  = self.I.buf_advs.std(),
+            MeanAdvantages = self.I.buf_advs.mean(),
+            StdAdvantages  = self.I.buf_advs.std(),
             retintmean = rets_int.mean(), # previously retmean
             retintstd  = rets_int.std(), # previously retstd
             retextmean = rets_ext.mean(), # previously not there
@@ -317,20 +317,41 @@ class PpoAgent(object):
             best_ret = self.best_ret,
             reset_counter = self.I.reset_counter
         )
-        wandb.log(info)
+        myInfo = {
+            "Mean of Advantages": self.I.buf_advs.mean(),
+            "StD of Advantages": self.I.buf_advs.std(),
+            "Mean of intrinsic Returns": rets_int.mean(),
+            "StD of intrinsic Returns": rets_int.std(),
+            "Mean of extrinsic Returns": rets_ext.mean(),
+            "StD of extrinsic Returns": rets_ext.std(),
+            "Mean of intrinsic Rewards (Unnormalized)": rewmean,
+            "StD of intrinsic Rewards (Unnormalized)": rets_int.std(),
+            "Maximum intrinsic Reward (Unnormalized)": rewmean,
+            "Mean of intrinsic Rewards (Normalized)": self.mean_int_rew,
+            "Maximum intrinsic Reward (Normalized)": self.max_int_rew,
+            "Mean of intrinsic Value-Prediction": self.I.buf_vpreds_int.mean(),
+            "StD of intrinsic Value-Prediction": self.I.buf_vpreds_int.std(),
+            "Mean of extrinsic Value-Prediction": self.I.buf_vpreds_ext.mean(),
+            "StD of extrinsic Value-Prediction": self.I.buf_vpreds_ext.std(),
+            "Explained Variance (Intrinsic)": np.clip(explained_variance(self.I.buf_vpreds_int.ravel(), rets_int.ravel()), -1, None),
+            "Explained Variance (Extrinsic)": np.clip(explained_variance(self.I.buf_vpreds_ext.ravel(), rets_ext.ravel()), -1, None),
+            "Recent Best Return": self.best_ret,       
+        }
+        wandb.log(myInfo)
+        
         info[f'mem_available'] = psutil.virtual_memory().available
 
-        to_record = {'acs': self.I.buf_acs,
-                     'rews_int': self.I.buf_rews_int,
-                     'rews_int_norm': rews_int,
-                     'rews_ext': self.I.buf_rews_ext,
-                     'vpred_int': self.I.buf_vpreds_int,
-                     'vpred_ext': self.I.buf_vpreds_ext,
-                     'adv_int': self.I.buf_advs_int,
-                     'adv_ext': self.I.buf_advs_ext,
-                     'ent': self.I.buf_ent,
-                     'ret_int': rets_int,
-                     'ret_ext': rets_ext,
+        to_record = {'Actions chosen': self.I.buf_acs,
+                     'Intrinsic Rewards': np.mean(self.I.buf_rews_int),
+                     'Intrinsic Rewards(Normalized)': rews_int,
+                     'Extrinsic Rewards': np.mean(self.I.buf_rews_ext),
+                     'Value-Predictions (Intrinsic)': self.I.buf_vpreds_int,
+                     'Value-Predicitons (Extrinsic)': self.I.buf_vpreds_ext,
+                     'Advantages (Intrinsic)': self.I.buf_advs_int,
+                     'Advantages (Extrinsic)': self.I.buf_advs_ext,
+                     'Entropy': self.I.buf_ent,
+                     'Returns (Intrinsic)': rets_int,
+                     'Returns (Extrinsic)': rets_ext,
                      }
         wandb.log(to_record)
         
@@ -400,13 +421,14 @@ class PpoAgent(object):
             self.I.stats["n_updates"] += 1
             info.update([('opt_'+n, lossdict[n]) for n in self.loss_names])
             tnow = time.time()
-            info['tps'] = self.nsteps * self.I.nenvs / (tnow - self.I.t_last_update)
-            info['time_elapsed'] = time.time() - self.t0
+            info['Timesteps/Sec'] = self.nsteps * self.I.nenvs / (tnow - self.I.t_last_update)
+            info['Time lapsed'] = time.time() - self.t0
             self.I.t_last_update = tnow
         self.stochpol.update_normalization( # Necessary for continuous control tasks with odd obs ranges, only implemented in mlp policy,
             ob=self.I.buf_obs               # NOTE: not shared via MPI
             )
         wandb.log(info)
+        wandb.log(self.I.stats["n_updates"])
         return info
 
     def env_step(self, l, acs):
@@ -543,7 +565,8 @@ class PpoAgent(object):
                 wandb.log({
                     "Number of Episodes": self.I.stats['epcount'],
                     "Episode Length": epinfo['l'],
-                    "Episode Reward": epinfo['r']
+                    "Episode Reward": epinfo['r'],
+                    "Total Timesteps": self.I.stats['tcount']
                 })
 
 
