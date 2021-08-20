@@ -341,7 +341,20 @@ class PpoAgent(object):
         
         info[f'mem_available'] = psutil.virtual_memory().available
 
-        to_record = {'Actions chosen': self.I.buf_acs,
+
+        to_record = {'acs': self.I.buf_acs,
+                     'rews_int': self.I.buf_rews_int,
+                     'rews_int_norm': rews_int,
+                     'rews_ext': self.I.buf_rews_ext,
+                     'vpred_int': self.I.buf_vpreds_int,
+                     'vpred_ext': self.I.buf_vpreds_ext,
+                     'adv_int': self.I.buf_advs_int,
+                     'adv_ext': self.I.buf_advs_ext,
+                     'ent': self.I.buf_ent,
+                     'ret_int': rets_int,
+                     'ret_ext': rets_ext,
+        }
+        my_record = {'Actions chosen': self.I.buf_acs,
                      'Intrinsic Rewards': np.mean(self.I.buf_rews_int),
                      'Intrinsic Rewards(Normalized)': rews_int,
                      'Extrinsic Rewards': np.mean(self.I.buf_rews_ext),
@@ -353,7 +366,7 @@ class PpoAgent(object):
                      'Returns (Intrinsic)': rets_int,
                      'Returns (Extrinsic)': rets_ext,
                      }
-        wandb.log(to_record)
+        wandb.log(my_record)
         
         if self.I.venvs[0].record_obs:
             to_record['obs'] = self.I.buf_obs[None]
