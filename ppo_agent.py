@@ -354,9 +354,9 @@ class PpoAgent(object):
                      'ret_ext': rets_ext,
         }
         my_record = {'Actions chosen': self.I.buf_acs,
-                     'Intrinsic Rewards': np.mean(self.I.buf_rews_int),
-                     'Intrinsic Rewards(Normalized)': rews_int,
-                     'Extrinsic Rewards': np.mean(self.I.buf_rews_ext),
+                     'Intrinsic Reward': np.mean(self.I.buf_rews_int),
+                     'Intrinsic Rewars(Normalized)': rews_int,
+                    #  'Extrinsic Rewards': np.mean(self.I.buf_rews_ext),
                      'Value-Predictions (Intrinsic)': self.I.buf_vpreds_int,
                      'Value-Predicitons (Extrinsic)': self.I.buf_vpreds_ext,
                      'Advantages (Intrinsic)': self.I.buf_advs_int,
