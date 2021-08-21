@@ -576,7 +576,7 @@ class PpoAgent(object):
                 
                 wandb.log({
                     "Number of Episodes": self.I.stats['epcount'],
-                    "Episode Length": epinfo['l'],
+                    "Length of Episode": epinfo['l'],
                     "Episode Reward": epinfo['r'],
                     "Number of Timesteps": self.I.stats['tcount']
                 })
