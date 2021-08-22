@@ -317,25 +317,39 @@ class PpoAgent(object):
             best_ret = self.best_ret,
             reset_counter = self.I.reset_counter
         )
+        
         myInfo = {
-            "Mean of Advantages": self.I.buf_advs.mean(),
-            "StD of Advantages": self.I.buf_advs.std(),
-            "Mean of intrinsic Returns": rets_int.mean(),
-            "StD of intrinsic Returns": rets_int.std(),
-            "Mean of extrinsic Returns": rets_ext.mean(),
-            "StD of extrinsic Returns": rets_ext.std(),
-            "Mean of intrinsic Rewards (Unnormalized)": rewmean,
-            "StD of intrinsic Rewards (Unnormalized)": rets_int.std(),
-            "Maximum intrinsic Reward (Unnormalized)": rewmean,
-            "Mean of intrinsic Rewards (Normalized)": self.mean_int_rew,
-            "Maximum intrinsic Reward (Normalized)": self.max_int_rew,
-            "Mean of intrinsic Value-Prediction": self.I.buf_vpreds_int.mean(),
-            "StD of intrinsic Value-Prediction": self.I.buf_vpreds_int.std(),
-            "Mean of extrinsic Value-Prediction": self.I.buf_vpreds_ext.mean(),
-            "StD of extrinsic Value-Prediction": self.I.buf_vpreds_ext.std(),
-            "Explained Variance (Intrinsic)": np.clip(explained_variance(self.I.buf_vpreds_int.ravel(), rets_int.ravel()), -1, None),
-            "Explained Variance (Extrinsic)": np.clip(explained_variance(self.I.buf_vpreds_ext.ravel(), rets_ext.ravel()), -1, None),
-            "Recent Best Reward": self.best_ret,       
+            'Advantages (Extrinsic)': self.I.buf_advs_ext,
+            'Advantages (Intrinsic)': self.I.buf_advs_int,
+            'Mean of Advantages (Combined)': self.I.buf_advs.mean(),
+            'StD of Advantages (Combined)': self.I.buf_advs.std(),
+            'Mean of Advantages (Extrinsic)':self.I.buf_advs_ext.mean(),
+            'StD of Advantages (Extrinsic)':self.I.buf_advs_ext.std(),
+            
+            'Returns (Intrinsic)': rets_int,
+            'Mean of Returns (Intrinsic)': rets_int.mean(),
+            'StD of Returns (Intrinsic)': rets_int.std(),
+            'Returns (Extrinsic)': rets_ext,
+            'Mean of Returns (Extrinsic)': rets_ext.mean(),
+            'StD of Returns (Extrinsic)': rets_ext.std(),
+            
+            'Mean of unnormalized Rewards (Intrinsic)': rewmean,
+            'StD of unnormalized Rewards (Intrinsic)': rets_int.std(),
+            'Maximum unnormalized Reward (Intrinsic)': rewmean,
+            'Mean of normalized Rewards (Intrinsic)': self.mean_int_rew,
+            'Maximum normalized Reward (Intrinsic)': self.max_int_rew,
+            
+            'Value-Predictions (Intrinsic)': self.I.buf_vpreds_int,
+            'Mean of Value-Prediction (Intrinsic)': self.I.buf_vpreds_int.mean(),
+            'StD of Value-Prediction (Intrinsic)': self.I.buf_vpreds_int.std(),
+            'Value-Predicitons (Extrinsic)': self.I.buf_vpreds_ext,
+            'Mean of Value-Prediction (Extrinsic)': self.I.buf_vpreds_ext.mean(),
+            'StD of Value-Prediction (Extrinsic)': self.I.buf_vpreds_ext.std(),
+            
+            'Entropy': np.mean(self.I.buf_ent),
+            'Explained Variance (Intrinsic)': np.clip(explained_variance(self.I.buf_vpreds_int.ravel(), rets_int.ravel()), -1, None),
+            'Explained Variance (Extrinsic)': np.clip(explained_variance(self.I.buf_vpreds_ext.ravel(), rets_ext.ravel()), -1, None),
+            'Recent Best Reward': self.best_ret,       
         }
         
         # info[f'mem_available'] = psutil.virtual_memory().available
@@ -353,19 +367,6 @@ class PpoAgent(object):
                      'ret_int': rets_int,
                      'ret_ext': rets_ext,
         }
-        my_record = {'Actions chosen': self.I.buf_acs,
-                     'Intrinsic Reward': np.mean(self.I.buf_rews_int),
-                     'Intrinsic Rewars(Normalized)': rews_int,
-                    #  'Extrinsic Rewards': np.mean(self.I.buf_rews_ext),
-                     'Value-Predictions (Intrinsic)': self.I.buf_vpreds_int,
-                     'Value-Predicitons (Extrinsic)': self.I.buf_vpreds_ext,
-                     'Advantages (Intrinsic)': self.I.buf_advs_int,
-                     'Advantages (Extrinsic)': self.I.buf_advs_ext,
-                     'Entropy': np.mean(self.I.buf_ent),
-                     'Returns (Intrinsic)': rets_int,
-                     'Returns (Extrinsic)': rets_ext,
-                     }
-        wandb.log(my_record)
         
         if self.I.venvs[0].record_obs:
             to_record['obs'] = self.I.buf_obs[None]
