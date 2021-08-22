@@ -333,6 +333,7 @@ class PpoAgent(object):
             'Mean of Returns (Extrinsic)': rets_ext.mean(),
             'StD of Returns (Extrinsic)': rets_ext.std(),
             
+            'Intrinsic Reward': np.mean(self.I.buf_rews_int),
             'Mean of unnormalized Rewards (Intrinsic)': rewmean,
             'StD of unnormalized Rewards (Intrinsic)': rets_int.std(),
             'Maximum unnormalized Reward (Intrinsic)': rewmean,
