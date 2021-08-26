@@ -113,7 +113,7 @@ def main():
     parser.add_argument('--proportion_of_exp_used_for_predictor_update', type=float, default=1.)
     parser.add_argument('--tag', type=str, default='')
     parser.add_argument('--policy', type=str, default='rnn', choices=['cnn', 'rnn'])
-    parser.add_argument('--int_coeff', type=float, default=1.)
+    parser.add_argument('--int_coeff', type=float, default=0.)
     parser.add_argument('--ext_coeff', type=float, default=1.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
 
@@ -150,7 +150,7 @@ def main():
         ext_coeff=args.ext_coeff,
         dynamics_bonus = args.dynamics_bonus
     )
-    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name ="Both rewards", config = hps)
+    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Extrinsic only", config = hps)
     wandb.config.update(args)
     
     tf_util.make_session(make_default=True)
