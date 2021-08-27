@@ -3,7 +3,7 @@ astor==0.8.1
 astunparse==1.6.3
 atari-py==0.2.9
 backcall==0.2.0
--e git+https://github.com/openai/baselines.git@ea25b9e8b234e6ee1bca43083f8f3cf974143998#egg=baselines
+#-e git+https://github.com/openai/baselines.git@ea25b9e8b234e6ee1bca43083f8f3cf974143998#egg=baselines
 cached-property==1.5.2
 cachetools==4.2.2
 certifi==2021.5.30
@@ -28,8 +28,8 @@ google-auth==1.34.0
 google-auth-oauthlib==0.4.4
 google-pasta==0.2.0
 grpcio==1.34.1
--e git+git@github.com:lukasschueler/rndRobustness.git@d6744cce96def1108ba55a59baf29d92c28a923a#egg=gym
-gym-minigrid==1.0.2
+#-e git+git@github.com:lukasschueler/rndRobustness.git@d6744cce96def1108ba55a59baf29d92c28a923a#egg=gym
+#gym-minigrid==1.0.2
 h5py==3.1.0
 idna==3.2
 imageio==2.9.0

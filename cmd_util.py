@@ -5,7 +5,7 @@ Helpers for scripts like run_atari.py.
 import os
 
 import gym
-from gym.wrappers import FlattenDictWrapper
+#from gym.wrappers import FlattenDictWrapper
 from gym.wrappers import Monitor as VideoMonitor
 from mpi4py import MPI
 from baselines import logger
@@ -15,7 +15,7 @@ from atari_wrappers import make_atari, wrap_deepmind
 from vec_env import SubprocVecEnv
 import gym_minigrid
 
-from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper, VectorizedWrapper
+from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
 
 
 
