@@ -119,6 +119,8 @@ def main():
 
 
     args = parser.parse_args()
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
     logger.configure(dir=logger.get_dir(), format_strs=['stdout', 'log', 'csv'] if MPI.COMM_WORLD.Get_rank() == 0 else [])
     if MPI.COMM_WORLD.Get_rank() == 0:
         with open(os.path.join(logger.get_dir(), 'experiment_tag.txt'), 'w') as f:
