@@ -34,7 +34,7 @@ def make_atari_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, ma
     # set_global_seeds(seed)
     return SubprocVecEnv([make_env(i + start_index) for i in range(num_env)])
 
-def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0):
+def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, max_episode_steps=4500):
     """
     Create a wrapped, monitored SubprocVecEnv for the MiniGrid-Environment
     """
