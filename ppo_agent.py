@@ -442,8 +442,10 @@ class PpoAgent(object):
         self.stochpol.update_normalization( # Necessary for continuous control tasks with odd obs ranges, only implemented in mlp policy,
             ob=self.I.buf_obs               # NOTE: not shared via MPI
             )
+        
         wandb.log(myInfo)
         wandb.log({"Number of Updates": self.I.stats["n_updates"]})
+        
         return info
 
     def env_step(self, l, acs):
