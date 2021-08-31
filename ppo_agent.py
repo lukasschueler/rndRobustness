@@ -436,6 +436,7 @@ class PpoAgent(object):
             myInfo.update([(n, lossdict[n]) for n in self.loss_names])
             tnow = time.time()
             myInfo['Timesteps/Sec'] = self.nsteps * self.I.nenvs / (tnow - self.I.t_last_update)
+            myInfo['Updates/Sec'] = 1. / (tnow - self.I.t_last_update)
             myInfo['Time lapsed'] = time.time() - self.t0
             self.I.t_last_update = tnow
         self.stochpol.update_normalization( # Necessary for continuous control tasks with odd obs ranges, only implemented in mlp policy,
