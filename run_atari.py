@@ -101,7 +101,7 @@ def add_env_params(parser):
 def main():
     parser = arg_parser()
     add_env_params(parser)
-    parser.add_argument('--num-timesteps', type=int, default=int(100000000))
+    parser.add_argument('--num-timesteps', type=int, default=int(1000000))
     parser.add_argument('--num_env', type=int, default=8)
     parser.add_argument('--use_news', type=int, default=0)
     parser.add_argument('--gamma', type=float, default=0.99)
@@ -113,8 +113,8 @@ def main():
     parser.add_argument('--proportion_of_exp_used_for_predictor_update', type=float, default=1.)
     parser.add_argument('--tag', type=str, default='')
     parser.add_argument('--policy', type=str, default='rnn', choices=['cnn', 'rnn'])
-    parser.add_argument('--int_coeff', type=float, default=0.)
-    parser.add_argument('--ext_coeff', type=float, default=1.)
+    parser.add_argument('--int_coeff', type=float, default=1.)
+    parser.add_argument('--ext_coeff', type=float, default=0.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
 
 
@@ -152,7 +152,7 @@ def main():
         ext_coeff=args.ext_coeff,
         dynamics_bonus = args.dynamics_bonus
     )
-    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Extrinsic", config = hps)
+    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Intrinsic", config = hps)
     wandb.config.update(args)
     
     tf_util.make_session(make_default=True)
