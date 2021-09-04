@@ -556,6 +556,7 @@ class PpoAgent(object):
         #Some reporting logic.
         
         self.loggingData(epinfos)
+        
         for epinfo in epinfos:
             
             if self.testing:
@@ -591,14 +592,24 @@ class PpoAgent(object):
 
 
     def loggingData(self, all_ep_infos):
-
-        ext_rew = all_ep_infos["r"]
-        episode_length = all_ep_infos["l"]
         
-        int_rew = np.asarray(self.I.buf_rews_int)
-        print("------------------SHAPE OF INTROINSICS---------------------")
-        print(np.shape(int_rew))
+        print("-----------------------------------EPINFOS--------------------------------------------------------")
+        print(all_ep_infos)
         sys.exit("pass")
+        
+        # all_ep_infos = sorted(sum(all_ep_infos, []), key=lambda x: x[0])
+
+        # # all_ep_infos = [i_[1] for i_ in all_ep_infos]  # remove the step_count
+        # keys_ = all_ep_infos[0].keys()
+        # all_ep_infos = {k: [i[k] for i in all_ep_infos] for k in keys_}
+
+        # ext_rew = all_ep_infos["r"]
+        # episode_length = all_ep_infos["l"]
+        
+        # int_rew = np.asarray(self.I.buf_rews_int)
+        # print("------------------SHAPE OF INTROINSICS---------------------")
+        # print(np.shape(int_rew))
+        # sys.exit("pass")
         
         
         
