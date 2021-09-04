@@ -152,7 +152,7 @@ def main():
         ext_coeff=args.ext_coeff,
         dynamics_bonus = args.dynamics_bonus
     )
-    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Intrinsic", config = hps)
+    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Fraem logging etsting", config = hps)
     wandb.config.update(args)
     
     tf_util.make_session(make_default=True)
