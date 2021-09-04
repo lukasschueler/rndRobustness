@@ -479,6 +479,7 @@ class PpoAgent(object):
             obs, prevrews, news, infos = self.env_get(l)
             for env_pos_in_lump, info in enumerate(infos):
                 if 'episode' in info:
+                    print("---------------------TRUE-------------------------")
                     #Information like rooms visited is added to info on end of episode.
                     epinfos.append(info['episode'])
                     info_with_places = info['episode']
