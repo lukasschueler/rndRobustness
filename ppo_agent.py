@@ -13,6 +13,7 @@ from utils import explained_variance
 from console_util import fmt_row
 from mpi_util import MpiAdamOptimizer, RunningMeanStd, sync_from_root
 import wandb
+import sys 
 
 NO_STATES = ['NO_STATES']
 
@@ -279,6 +280,7 @@ class PpoAgent(object):
             delta = rews_int[:, t] + self.gamma * nextvals * nextnotnew - self.I.buf_vpreds_int[:, t]
             self.I.buf_advs_int[:, t] = lastgaelam = delta + self.gamma * self.lam * nextnotnew * lastgaelam
         rets_int = self.I.buf_advs_int + self.I.buf_vpreds_int
+        
         #Calculate extrinsic returns and advantages.
         lastgaelam = 0
         for t in range(self.nsteps-1, -1, -1): # nsteps-2 ... 0
@@ -458,6 +460,7 @@ class PpoAgent(object):
         Using step_wait if necessary
         """
         if self.I.step_count == 0: # On the zeroth step with a new venv, we need to call reset on the environment
+            # TODO: Maybe add here the reset function from Videorecorder
             ob = self.I.venvs[l].reset()
             out = self.I.env_results[l] = (ob, None, np.ones(self.I.lump_stride, bool), {})
         else:
@@ -551,7 +554,10 @@ class PpoAgent(object):
             update_info = {}
 
         #Some reporting logic.
+        
+        self.loggingData(epinfos)
         for epinfo in epinfos:
+            
             if self.testing:
                 self.I.statlists['eprew_test'].append(epinfo['r'])
                 self.I.statlists['eplen_test'].append(epinfo['l'])
@@ -578,16 +584,49 @@ class PpoAgent(object):
                 self.I.stats['tcount'] += epinfo['l']
                 self.I.stats['rewtotal'] += epinfo['r']
                 #self.I.stats["best_ext_ret"] = self.best_ret
-                
-                wandb.log({
-                    "Number of Episodes": self.I.stats['epcount'],
-                    "Length of Episode": epinfo['l'],
-                    "Episode Reward": epinfo['r'],
-                    "Number of Timesteps": self.I.stats['tcount']
-                })
+            
 
 
         return {'update' : update_info}
+
+
+    def loggingData(self, all_ep_infos):
+
+        ext_rew = all_ep_infos["r"]
+        episode_length = all_ep_infos["l"]
+        
+        int_rew = np.asarray(self.I.buf_rews_int)
+        print("------------------SHAPE OF INTROINSICS---------------------")
+        print(np.shape(int_rew))
+        sys.exit("pass")
+        
+        
+        
+        # int_rew = int_rew.flatten('F')
+        
+        # for index in range(0, len(episode_length), self.nenvs):
+            
+        #     mean_extrinsic_reward = np.mean(ext_rew[index: index+self.nenvs])
+        #     mean_episode_length = np.mean(episode_length[index: index+self.nenvs])
+        #     mean_intrinsic_reward = np.mean(int_rew[index: index+self.nenvs])
+            
+        #     if mean_extrinsic_reward > self.maxRewLogging:
+        #         self.maxRewLogging = mean_extrinsic_reward
+                
+        #     wandb.log({
+        #         "Episode Reward": mean_extrinsic_reward,
+        #         "Intrinsic Reward": mean_intrinsic_reward,
+        #         "Episode Length" : mean_episode_length,
+        #         "Recent Best Reward": self.maxRewLogging,
+        #         "Frames": self.frameCountLogging + 1
+        #     }, commit = False)
+            
+        #     self.frameCountLogging += 1
+            
+            
+
+
+
 
 
 class RewardForwardFilter(object):
