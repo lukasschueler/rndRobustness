@@ -128,6 +128,11 @@ class PpoAgent(object):
             self.comm_train, self.comm_train_size = self.comm_log, self.comm_log.Get_size()
         self.is_log_leader = self.comm_log.Get_rank()==0
         self.is_train_leader = self.comm_train.Get_rank()==0
+        
+        # MINE
+        self.logEpisodeCount = 0
+        self.numberFrames = 0
+        
         with tf.variable_scope(scope):
             self.best_ret = -np.inf
             self.local_best_ret = - np.inf
@@ -294,6 +299,7 @@ class PpoAgent(object):
 
         #Combine the extrinsic and intrinsic advantages.
         self.I.buf_advs = self.int_coeff*self.I.buf_advs_int + self.ext_coeff*self.I.buf_advs_ext
+        total_reward = int_coeff * int_rew + ext_coeff * np.clip(ext_rew, -1., 1.)
 
         #Collects info for reporting.
         info = dict(
@@ -321,6 +327,7 @@ class PpoAgent(object):
         )
         
         myInfo = {
+            'Total Reward': np.mean(total_reward),
             'Advantages (Extrinsic)': self.I.buf_advs_ext,
             'Advantages (Intrinsic)': self.I.buf_advs_int,
             'Mean of Advantages (Combined)': self.I.buf_advs.mean(),
@@ -335,7 +342,6 @@ class PpoAgent(object):
             'Mean of Returns (Extrinsic)': rets_ext.mean(),
             'StD of Returns (Extrinsic)': rets_ext.std(),
             
-            'Intrinsic Reward': np.mean(self.I.buf_rews_int),
             'Mean of unnormalized Rewards (Intrinsic)': rewmean,
             'StD of unnormalized Rewards (Intrinsic)': rets_int.std(),
             'Maximum unnormalized Reward (Intrinsic)': rewmean,
@@ -352,7 +358,7 @@ class PpoAgent(object):
             'Entropy': np.mean(self.I.buf_ent),
             'Explained Variance (Intrinsic)': np.clip(explained_variance(self.I.buf_vpreds_int.ravel(), rets_int.ravel()), -1, None),
             'Explained Variance (Extrinsic)': np.clip(explained_variance(self.I.buf_vpreds_ext.ravel(), rets_ext.ravel()), -1, None),
-            'Recent Best Reward': self.best_ret,       
+            # 'Recent Best Reward': self.best_ret,       
         }
         
         # info[f'mem_available'] = psutil.virtual_memory().available
@@ -445,8 +451,14 @@ class PpoAgent(object):
             ob=self.I.buf_obs               # NOTE: not shared via MPI
             )
         
+        
+        metricsToAdd =  {
+            "Frames seen":  MPI.COMM_WORLD.Get_size() * self.I.step_count * self.I.nenvs,
+            "Number of Updates": self.I.stats['n_updates'],
+            "Number of Episodes": self.I.stats['epcount']
+        }
+        myInfo.update(metricsToAdd)
         wandb.log(myInfo)
-        wandb.log({"Number of Updates": self.I.stats["n_updates"]})
         
         return info
 
@@ -475,13 +487,19 @@ class PpoAgent(object):
         #Does a rollout.
         t = self.I.step_count % self.nsteps
         epinfos = []
+        step_counts = []
         for l in range(self.I.nlump):
             obs, prevrews, news, infos = self.env_get(l)
+
             for env_pos_in_lump, info in enumerate(infos):
+                
+                
                 if 'episode' in info:
-                    print("---------------------TRUE-------------------------")
+                    
+                    # self.logEpisode(info)
                     #Information like rooms visited is added to info on end of episode.
                     epinfos.append(info['episode'])
+                    step_counts.append(self.I.step_count)
                     info_with_places = info['episode']
                     #COMEMNTED OUT BECAUSE THREW ERROR. SHOULD NOT BE NECESSARY FOR MY CHOSEN ENVIRONEMT
                     # try:
@@ -513,6 +531,7 @@ class PpoAgent(object):
                 self.I.buf_rews_ext[sli, t-1] = prevrews
 
         self.I.step_count += 1
+        
         if t == self.nsteps - 1 and not self.disable_policy_update:
             #We need to take one extra step so every transition has a reward.
             for l in range(self.I.nlump):
@@ -534,7 +553,8 @@ class PpoAgent(object):
                        self.stochpol.ph_std: self.stochpol.ob_rms.var ** 0.5})
             fd[self.stochpol.ph_ac] = self.I.buf_acs
             self.I.buf_rews_int[:] = tf.get_default_session().run(self.stochpol.int_rew, fd)
-
+        
+            
             if not self.update_ob_stats_every_step:
                 #Update observation normalization parameters after the rollout is completed.
                 obs_ = self.I.buf_obs[None].astype(np.float32)
@@ -555,10 +575,8 @@ class PpoAgent(object):
             update_info = {}
 
         #Some reporting logic.
-        
-        self.loggingData(epinfos)
-        
-        for epinfo in epinfos:
+                
+        for index, epinfo in enumerate(epinfos):
             
             if self.testing:
                 self.I.statlists['eprew_test'].append(epinfo['r'])
@@ -585,60 +603,27 @@ class PpoAgent(object):
                 self.I.stats['epcount'] += 1
                 self.I.stats['tcount'] += epinfo['l']
                 self.I.stats['rewtotal'] += epinfo['r']
-                #self.I.stats["best_ext_ret"] = self.best_ret
+                self.I.stats["best_ext_ret"] = self.best_ret
+                
+                wandb.log({
+                    "Number of Episodes": self.I.stats['epcount'],
+                    "Recent Best Reward": self.I.stats["best_ext_ret"],
+                    "Episode Reward" : epinfo['r'],
+                    "Length of Episode" : epinfo['l'],
+                    "Frames seen": MPI.COMM_WORLD.Get_size() * step_counts[index] * self.I.nenvs
+                    })
+        
+        wandb.log({
+            "Intrinsic Reward (Batch)": np.mean(self.I.buf_rews_int),
+            "Extrinsic Reward (Batch)": np.mean(self.I.buf_rews_ext),
+            "Frames seen":  MPI.COMM_WORLD.Get_size() * self.I.step_count * self.I.nenvs,
+            "Number of Updates": self.I.stats['n_updates'],
+            "Number of Episodes": self.I.stats['epcount']
+        })
             
 
 
         return {'update' : update_info}
-
-
-    def loggingData(self, all_ep_infos):
-        
-        print("-----------------------------------EPINFOS--------------------------------------------------------")
-        print(all_ep_infos)
-        sys.exit("pass")
-        
-        # all_ep_infos = sorted(sum(all_ep_infos, []), key=lambda x: x[0])
-
-        # # all_ep_infos = [i_[1] for i_ in all_ep_infos]  # remove the step_count
-        # keys_ = all_ep_infos[0].keys()
-        # all_ep_infos = {k: [i[k] for i in all_ep_infos] for k in keys_}
-
-        # ext_rew = all_ep_infos["r"]
-        # episode_length = all_ep_infos["l"]
-        
-        # int_rew = np.asarray(self.I.buf_rews_int)
-        # print("------------------SHAPE OF INTROINSICS---------------------")
-        # print(np.shape(int_rew))
-        # sys.exit("pass")
-        
-        
-        
-        # int_rew = int_rew.flatten('F')
-        
-        # for index in range(0, len(episode_length), self.nenvs):
-            
-        #     mean_extrinsic_reward = np.mean(ext_rew[index: index+self.nenvs])
-        #     mean_episode_length = np.mean(episode_length[index: index+self.nenvs])
-        #     mean_intrinsic_reward = np.mean(int_rew[index: index+self.nenvs])
-            
-        #     if mean_extrinsic_reward > self.maxRewLogging:
-        #         self.maxRewLogging = mean_extrinsic_reward
-                
-        #     wandb.log({
-        #         "Episode Reward": mean_extrinsic_reward,
-        #         "Intrinsic Reward": mean_intrinsic_reward,
-        #         "Episode Length" : mean_episode_length,
-        #         "Recent Best Reward": self.maxRewLogging,
-        #         "Frames": self.frameCountLogging + 1
-        #     }, commit = False)
-            
-        #     self.frameCountLogging += 1
-            
-            
-
-
-
 
 
 class RewardForwardFilter(object):

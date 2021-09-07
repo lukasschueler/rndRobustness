@@ -101,7 +101,11 @@ def add_env_params(parser):
 def main():
     parser = arg_parser()
     add_env_params(parser)
-    parser.add_argument('--num-timesteps', type=int, default=int(1000000))
+    # Short runs
+    parser.add_argument('--num-timesteps', type=int, default=int(1000064))
+    # Long runs
+    # parser.add_argument('--num-timesteps', type=int, default=int(10000000))
+    
     parser.add_argument('--num_env', type=int, default=8)
     parser.add_argument('--use_news', type=int, default=0)
     parser.add_argument('--gamma', type=float, default=0.99)
@@ -113,8 +117,8 @@ def main():
     parser.add_argument('--proportion_of_exp_used_for_predictor_update', type=float, default=1.)
     parser.add_argument('--tag', type=str, default='')
     parser.add_argument('--policy', type=str, default='rnn', choices=['cnn', 'rnn'])
-    parser.add_argument('--int_coeff', type=float, default=1.)
-    parser.add_argument('--ext_coeff', type=float, default=0.)
+    parser.add_argument('--int_coeff', type=float, default=0.)
+    parser.add_argument('--ext_coeff', type=float, default=1.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
 
 
@@ -133,6 +137,7 @@ def main():
     set_global_seeds(seed)
 
     hps = dict(
+        # TODO: Change frames stack and number minibatches
         frame_stack=4,
         nminibatches=4,
         nepochs=4,
@@ -152,8 +157,28 @@ def main():
         ext_coeff=args.ext_coeff,
         dynamics_bonus = args.dynamics_bonus
     )
-    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Fraem logging etsting", config = hps)
+    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Fial testing!?", config = hps)
     wandb.config.update(args)
+    
+    # Define the custom x axis metric
+    wandb.define_metric("Number of Episodes")
+    wandb.define_metric("Frames seen")
+    wandb.define_metric("Number of Updates")
+
+    # Define which metrics to plot against that x-axis
+    wandb.define_metric("Episode Reward", step_metric='Number of Episodes')
+    wandb.define_metric("Length of Episode", step_metric='Number of Episodes')
+    wandb.define_metric("Recent Best Reward", step_metric='Number of Episodes')
+    
+    wandb.define_metric("Episode Reward", step_metric='Frames seen')
+    wandb.define_metric("Length of Episode", step_metric='Frames seen')
+    wandb.define_metric("Recent Best Reward", step_metric='Frames seen')
+    
+    wandb.define_metric("Intrinsic Reward (Batch)", step_metric='Frames seen')
+    wandb.define_metric("Extrinsic Reward (Batch)", step_metric='Frames seen')
+    
+    wandb.define_metric("Intrinsic Reward (Batch)", step_metric='Number of Updates')
+    wandb.define_metric("Extrinsic Reward (Batch)", step_metric='Number of Updates')
     
     tf_util.make_session(make_default=True)
     train(env_id=args.env, num_env=args.num_env, seed=seed,
