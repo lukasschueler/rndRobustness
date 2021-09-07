@@ -455,6 +455,7 @@ class PpoAgent(object):
         metricsToAdd =  {
             "Frames seen":  MPI.COMM_WORLD.Get_size() * self.I.step_count * self.I.nenvs,
             "Number of Updates": self.I.stats['n_updates'],
+            "Updates": self.I.stats['n_updates'] * self.nepochs,
             "Number of Episodes": self.I.stats['epcount']
         }
         myInfo.update(metricsToAdd)
