@@ -106,6 +106,7 @@ def main():
     # Long runs
     # parser.add_argument('--num-timesteps', type=int, default=int(10000000))
     
+    parser.add_argument('--exp_name', type=str, default='default')
     parser.add_argument('--num_env', type=int, default=8)
     parser.add_argument('--use_news', type=int, default=0)
     parser.add_argument('--gamma', type=float, default=0.99)
@@ -139,7 +140,7 @@ def main():
     hps = dict(
         # TODO: Change frames stack and number minibatches
         frame_stack=4,
-        nminibatches=4,
+        nminibatches=8,
         nepochs=4,
         lr=0.0001,
         max_grad_norm=0.0,
@@ -157,7 +158,7 @@ def main():
         ext_coeff=args.ext_coeff,
         dynamics_bonus = args.dynamics_bonus
     )
-    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Fial testing!?", config = hps)
+    wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = args["exp_name"], config = hps)
     wandb.config.update(args)
     
     # Define the custom x axis metric
