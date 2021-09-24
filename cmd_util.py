@@ -5,6 +5,8 @@ Helpers for scripts like run_atari.py.
 import os
 
 import gym
+from gym.wrappers import RecordVideo
+
 #from gym.wrappers import FlattenDictWrapper
 # from gym.wrappers import Monitor as VideoMonitor
 from gym.wrappers import RecordVideo

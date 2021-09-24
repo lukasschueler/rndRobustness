@@ -123,7 +123,7 @@ def main():
     parser.add_argument('--int_coeff', type=float, default=0.)
     parser.add_argument('--ext_coeff', type=float, default=1.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
-    parser.add_argument('--number_stack', type=int, default=1)
+    parser.add_argument('--number_stack', type=int, default=4)
 
 
     args = parser.parse_args()
@@ -162,7 +162,6 @@ def main():
         dynamics_bonus = args.dynamics_bonus
     )
     wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = args.exp_name, config = hps)
-    # wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = "Intrinsic", config = hps)
     wandb.config.update(args)
     
     # Define the custom x axis metric
