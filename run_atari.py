@@ -139,7 +139,7 @@ def main():
 
     hps = dict(
         # TODO: Change frames stack and number minibatches
-        frame_stack=4,
+        frame_stack=1,
         nminibatches=8,
         nepochs=4,
         lr=0.0001,
