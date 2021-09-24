@@ -299,7 +299,7 @@ class PpoAgent(object):
 
         #Combine the extrinsic and intrinsic advantages.
         self.I.buf_advs = self.int_coeff*self.I.buf_advs_int + self.ext_coeff*self.I.buf_advs_ext
-        total_reward = int_coeff * int_rew + ext_coeff * np.clip(ext_rew, -1., 1.)
+        total_reward = self.int_coeff * self.I.buf_rews_int + self.ext_coeff * np.clip(self.I.buf_rews_ext, -1., 1.)
 
         #Collects info for reporting.
         info = dict(
