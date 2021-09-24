@@ -6,7 +6,9 @@ import os
 
 import gym
 #from gym.wrappers import FlattenDictWrapper
-from gym.wrappers import Monitor as VideoMonitor
+# from gym.wrappers import Monitor as VideoMonitor
+from gym.wrappers import RecordVideo
+
 from mpi4py import MPI
 from baselines import logger
 from stable_baselines.common.vec_env import VecVideoRecorder, DummyVecEnv
@@ -42,9 +44,10 @@ def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, m
         def _thunk():
             env = gym.make(env_id)
             # env._max_episode_steps = max_episode_steps*4
+            
             env.seed(seed + rank)
             env = Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)), allow_early_resets=True)
-
+            env = RecordVideo(env, "./RNDvideo" )
             # env = VideoMonitor(env, "./RNDvideo", video_callable = lambda episode_id: episode_id%100000, force =True)
            # env = VecVideoRecorder(env,"./video", record_video_trigger = lambda episode_id: episode_id%500)
             return ImgObsWrapper(RGBImgPartialObsWrapper(env))
