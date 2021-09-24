@@ -102,11 +102,13 @@ def main():
     parser = arg_parser()
     add_env_params(parser)
     # Short runs
-    parser.add_argument('--num-timesteps', type=int, default=int(1000064))
+    # parser.add_argument('--num-timesteps', type=int, default=int(1000064))
+    # Middle runs
+    parser.add_argument('--num-timesteps', type=int, default=int(2000000))
     # Long runs
     # parser.add_argument('--num-timesteps', type=int, default=int(10000000))
     
-    parser.add_argument('--exp_name', type=str, default='default')
+    parser.add_argument('--exp_name', type=str, default='Just another test')
     parser.add_argument('--num_env', type=int, default=8)
     parser.add_argument('--use_news', type=int, default=0)
     parser.add_argument('--gamma', type=float, default=0.99)
@@ -121,6 +123,7 @@ def main():
     parser.add_argument('--int_coeff', type=float, default=0.)
     parser.add_argument('--ext_coeff', type=float, default=1.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
+    parser.add_argument('--number_stack', type=int, default=4)
 
 
     args = parser.parse_args()
@@ -139,7 +142,7 @@ def main():
 
     hps = dict(
         # TODO: Change frames stack and number minibatches
-        frame_stack=1,
+        frame_stack=args.number_stack,
         nminibatches=8,
         nepochs=4,
         lr=0.0001,
@@ -159,6 +162,7 @@ def main():
         dynamics_bonus = args.dynamics_bonus
     )
     wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = args.exp_name, config = hps)
+            #    , monitor_gym = True)
     wandb.config.update(args)
     
     # Define the custom x axis metric
