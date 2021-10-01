@@ -419,12 +419,16 @@ class PpoAgent(object):
 
             fd = {ph : buf[mbenvinds] for (ph, buf) in ph_buf}
             fd.update({self.ph_lr : self.lr, self.ph_cliprange : self.cliprange})
+            
             fd[self.stochpol.ph_ob[None]] = np.concatenate([self.I.buf_obs[None][mbenvinds], self.I.buf_ob_last[None][mbenvinds, None]], 1)
+            
             assert list(fd[self.stochpol.ph_ob[None]].shape) == [self.I.nenvs//self.nminibatches, self.nsteps + 1] + list(self.ob_space.shape), \
                 [fd[self.stochpol.ph_ob[None]].shape, [self.I.nenvs//self.nminibatches, self.nsteps + 1] + list(self.ob_space.shape)]
+                
             fd.update({self.stochpol.ph_mean:self.stochpol.ob_rms.mean, self.stochpol.ph_std:self.stochpol.ob_rms.var**0.5})
 
             ret = tf.get_default_session().run(self._losses+[self._train], feed_dict=fd)[:-1]
+
             if not self.testing:
                 lossdict = dict(zip([n for n in self.loss_names], ret), axis=0)
             else:
@@ -442,7 +446,7 @@ class PpoAgent(object):
                 start = 0
 
         if self.is_train_leader:
-            self.I.stats["n_updates"] += 1
+            self.I.stats["n_updates"] += self.nminibatches * self.nepochs
             myInfo.update([(n, lossdict[n]) for n in self.loss_names])
             tnow = time.time()
             myInfo['Timesteps/Sec'] = self.nsteps * self.I.nenvs / (tnow - self.I.t_last_update)
@@ -457,7 +461,6 @@ class PpoAgent(object):
         metricsToAdd =  {
             "Frames seen":  MPI.COMM_WORLD.Get_size() * self.I.step_count * self.I.nenvs,
             "Number of Updates": self.I.stats['n_updates'],
-            "Updates": self.I.stats['n_updates'] * self.nepochs,
             "Number of Episodes": self.I.stats['epcount']
         }
         myInfo.update(metricsToAdd)
