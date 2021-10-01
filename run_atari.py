@@ -170,9 +170,11 @@ def main():
     wandb.define_metric("Number of Updates")
 
     # Define which metrics to plot against that x-axis
-    wandb.define_metric("Episode Reward", step_metric='Number of Episodes')
-    wandb.define_metric("Length of Episode", step_metric='Number of Episodes')
-    wandb.define_metric("Recent Best Reward", step_metric='Number of Episodes')
+    wandb.define_metric("Episode Reward", step_metric='Number of Updates')
+    wandb.define_metric("Length of Episode", step_metric='Number of Updates')
+    wandb.define_metric("Recent Best Reward", step_metric='Number of Updates')
+    wandb.define_metric("Intrinsic Reward (Batch)", step_metric='Number of Updates')
+    wandb.define_metric("Extrinsic Reward (Batch)", step_metric='Number of Updates')
     
     wandb.define_metric("Episode Reward", step_metric='Frames seen')
     wandb.define_metric("Length of Episode", step_metric='Frames seen')
@@ -181,8 +183,6 @@ def main():
     wandb.define_metric("Intrinsic Reward (Batch)", step_metric='Frames seen')
     wandb.define_metric("Extrinsic Reward (Batch)", step_metric='Frames seen')
     
-    wandb.define_metric("Intrinsic Reward (Batch)", step_metric='Number of Updates')
-    wandb.define_metric("Extrinsic Reward (Batch)", step_metric='Number of Updates')
     
     tf_util.make_session(make_default=True)
     train(env_id=args.env, num_env=args.num_env, seed=seed,
