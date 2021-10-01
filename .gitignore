@@ -5,3 +5,5 @@ baselines
 video
 RNDvideo
 wandb
+.vscode
+gym-minigrid

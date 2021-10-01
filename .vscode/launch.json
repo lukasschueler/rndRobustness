@@ -7,7 +7,7 @@
         "name": "Python: Current File",
         "type": "python",
         "request": "launch",
-        "program": "/home/lukas/Documents/thesis/rndRobustness/run_atari.py",
+        "program": "/home/luki/Documents/thesis/code/rndRobustness/run_atari.py",
         "console": "integratedTerminal"
     }]
 }
