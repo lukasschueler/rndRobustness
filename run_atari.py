@@ -15,15 +15,23 @@ from vec_env import VecFrameStack
 
 import gym
 import gym_minigrid
-from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
+from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper, StateCoverage
 from stable_baselines.common.vec_env import VecVideoRecorder
 import wandb
 
 def train(*, env_id, num_env, hps, num_timesteps, seed):
     venv = VecFrameStack(
-    		       make_custom_env(env_id, num_env, seed, wrapper_kwargs=dict(),
-                       start_index=num_env * MPI.COMM_WORLD.Get_rank(),
-                       max_episode_steps=hps.pop('max_episode_steps')),
+    		       make_custom_env(env_id,
+                            num_env,
+                            seed,
+                            start_index=num_env * MPI.COMM_WORLD.Get_rank(),
+                            max_episode_steps=hps.pop('max_episode_steps'),
+                            record_when = hps.pop("record_when"),
+                            size = hps.pop("size"),
+                            random_actions = hps.pop("random_actions"),
+                            add_noise = hps.pop("add_noise"),
+                            record_coverage = hps.pop('record_coverage')
+                            ),
     hps.pop('frame_stack'))
 
 #    venv.num_envs = num_env
@@ -124,6 +132,12 @@ def main():
     parser.add_argument('--ext_coeff', type=float, default=1.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
     parser.add_argument('--number_stack', type=int, default=4)
+    
+    parser.add_argument('--record_when', type=int, default=400)
+    parser.add_argument('--size', type=int, default=8)
+    parser.add_argument('--random_actions', default=False)
+    parser.add_argument('--record_coverage', default=False)
+    parser.add_argument('--add_noise', default=False)
 
 
     args = parser.parse_args()
@@ -159,7 +173,13 @@ def main():
         policy=args.policy,
         int_coeff=args.int_coeff,
         ext_coeff=args.ext_coeff,
-        dynamics_bonus = args.dynamics_bonus
+        dynamics_bonus = args.dynamics_bonus,
+        record_coverage = args.record_coverage,
+        record_when = args.record_when,
+        size = args.size,
+        random_actions = args.random_actions,
+        add_noise = args.add_noise,
+        
     )
     wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = args.exp_name, config = hps)
     wandb.config.update(args)
