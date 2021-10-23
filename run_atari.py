@@ -102,9 +102,9 @@ def main():
     parser = arg_parser()
     add_env_params(parser)
     # Short runs
-    # parser.add_argument('--num-timesteps', type=int, default=int(1000064))    
+    parser.add_argument('--num-timesteps', type=int, default=int(1000448))    
     # Middle runs
-    parser.add_argument('--num-timesteps', type=int, default=int(2000000))
+    # parser.add_argument('--num-timesteps', type=int, default=int(2000000))
     # Long runs
     # parser.add_argument('--num-timesteps', type=int, default=int(10000000))
     
@@ -119,11 +119,11 @@ def main():
     parser.add_argument('--update_ob_stats_from_random_agent', type=int, default=1)
     parser.add_argument('--proportion_of_exp_used_for_predictor_update', type=float, default=1.)
     parser.add_argument('--tag', type=str, default='')
-    parser.add_argument('--policy', type=str, default='rnn', choices=['cnn', 'rnn'])
-    parser.add_argument('--int_coeff', type=float, default=0.)
+    parser.add_argument('--policy', type=str, default='cnn', choices=['cnn', 'rnn'])
+    parser.add_argument('--int_coeff', type=float, default=1.)
     parser.add_argument('--ext_coeff', type=float, default=1.)
     parser.add_argument('--dynamics_bonus', type=int, default=0)
-    parser.add_argument('--number_stack', type=int, default=4)
+    parser.add_argument('--number_stack', type=int, default=1)
 
 
     args = parser.parse_args()
@@ -141,7 +141,6 @@ def main():
     set_global_seeds(seed)
 
     hps = dict(
-        # TODO: Change frames stack and number minibatches
         frame_stack=args.number_stack,
         nminibatches=8,
         nepochs=4,
