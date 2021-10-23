@@ -20,7 +20,9 @@ from vec_env import SubprocVecEnv
 import gym_minigrid
 
 from gym_minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
-
+from noisyObservationWrapper import MakeEnvDynamic
+from randomActionWrapper import RandomActionWrapper
+from stateCoverage import stateCoverage
 
 
 def make_atari_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, max_episode_steps=4500):
@@ -38,7 +40,7 @@ def make_atari_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, ma
     # set_global_seeds(seed)
     return SubprocVecEnv([make_env(i + start_index) for i in range(num_env)])
 
-def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, max_episode_steps=4500):
+def make_custom_env(env_id, num_env, seed, start_index=0, max_episode_steps=4500, record_when =400, size =8, random_actions=False, add_noise=False, record_coverage=False):
     """
     Create a wrapped, monitored SubprocVecEnv for the MiniGrid-Environment
     """
@@ -52,7 +54,14 @@ def make_custom_env(env_id, num_env, seed, wrapper_kwargs=None, start_index=0, m
             env = RecordVideo(env, "./RNDvideo" )
             # env = VideoMonitor(env, "./RNDvideo", video_callable = lambda episode_id: episode_id%100000, force =True)
            # env = VecVideoRecorder(env,"./video", record_video_trigger = lambda episode_id: episode_id%500)
-            return ImgObsWrapper(RGBImgPartialObsWrapper(env))
+            env = ImgObsWrapper(RGBImgPartialObsWrapper(env))
+            if random_actions:
+                env = RandomActionWrapper(env)        
+            if add_noise:
+                env = MakeEnvDynamic(env)        
+            if record_coverage:
+                env = stateCoverage(env, size, record_when) 
+            return env
         return _thunk
     # set_global_seeds(seed)
     return SubprocVecEnv([make_env(i+start_index) for i in range(num_env)])
