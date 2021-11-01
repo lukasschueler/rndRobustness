@@ -183,6 +183,7 @@ def main():
     )
     wandb.init(project="thesis", group = "Random_Network_Distillation", entity = "lukischueler", name = args.exp_name, config = hps)
     wandb.config.update(args)
+    wandb.config.update({"architecture": "rnd"})
     
     # Define the custom x axis metric
     wandb.define_metric("Number of Episodes")
