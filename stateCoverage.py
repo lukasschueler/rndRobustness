@@ -1,5 +1,4 @@
 import gym
-from statTools import statTools
 import seaborn as sns
 import numpy as np
 import wandb
@@ -34,14 +33,14 @@ class stateCoverage(gym.core.Wrapper):
         self.counts[tup] = new_count
 
         if self.numberTimesteps % self.recordWhen == 0:
-            self.createHeatMap(self.counts, self.envSize)
+            self.createHeatmap(self.counts, self.envSize)
 
         return obs, reward, done, info
 
     def reset(self, **kwargs):
         return self.env.reset(**kwargs)
     
-    def createHeatmap(dictionary, envSize):
+    def createHeatmap(self, dictionary, envSize):
         grid = np.zeros((envSize, envSize))
         for key, value in dictionary.items():
             x = key[0]
